@@ -1,4 +1,4 @@
-<title>かきかきかき</title>
+<title>一筆がき</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Zen+Maru+Gothic:wght@500;700;900&display=swap">
@@ -25,8 +25,8 @@
     font-size: 15px;
     -webkit-tap-highlight-color: transparent;
   }
-  .wrap {
-    max-width: 480px;
+  .screen {
+    max-width: 520px;
     margin: 0 auto;
     padding-inline: 16px;
     padding-block: 14px 28px;
@@ -34,51 +34,55 @@
     flex-direction: column;
     gap: 12px;
   }
-  header { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
   h1 {
     font-family: "Dela Gothic One", "Hiragino Sans", sans-serif;
     font-weight: 400;
-    font-size: clamp(30px, 9vw, 40px);
     line-height: 1;
     margin: 0;
-    letter-spacing: -0.02em;
+    letter-spacing: 0.02em;
   }
-  h1 .o { color: var(--oyster); }
-  h1 .k { color: var(--kaki); }
-  h1 .g { color: var(--gaki); }
-  .best { font-size: 12px; color: var(--ink-soft); white-space: nowrap; font-variant-numeric: tabular-nums; }
-  .odai {
-    margin: 0;
-    font-size: 13px;
-    line-height: 1.6;
-    color: var(--ink-soft);
-  }
+  #draw h1 { font-size: clamp(34px, 11vw, 48px); }
+  #result h1 { font-size: 22px; }
+  .odai { margin: 0; font-size: 14px; line-height: 1.6; color: var(--ink-soft); }
   .odai b { color: var(--ink); }
 
   .board {
     position: relative;
     width: 100%;
-    aspect-ratio: 1 / 1;
     max-width: 100%;
+    aspect-ratio: 1 / 1;
+    margin-inline: auto;
     background: var(--paper);
     border: 2px solid var(--ink);
     border-radius: 6px;
     box-shadow: 4px 4px 0 var(--ink);
-    touch-action: none;
     overflow: hidden;
   }
+  /* 描く画面は画面の高さに収まる一番大きい正方形 */
+  #draw .board { width: min(100%, calc(100vh - 170px)); width: min(100%, calc(100dvh - 170px)); min-width: 240px; }
+  #result .board { width: min(100%, 340px); }
   canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+  #draw .board, #draw canvas { touch-action: none; }
   .hint {
     position: absolute; inset: 0;
     display: grid; place-items: center;
     pointer-events: none;
     text-align: center;
-    color: #a9aca6;
-    font-weight: 700;
-    font-size: 15px;
-    line-height: 1.7;
+    color: #b3b6b0;
+    font-family: "Dela Gothic One", sans-serif;
+    font-size: 26px;
   }
-  .hint big { display: block; font-family: "Dela Gothic One", sans-serif; font-weight: 400; font-size: 26px; color: #c3c6bf; }
+  .judging {
+    position: absolute; inset: 0;
+    display: grid; place-items: center;
+    background: rgba(251, 250, 245, 0.7);
+    font-family: "Dela Gothic One", sans-serif;
+    font-size: 30px;
+    color: var(--stamp);
+  }
+  .judging span { animation: blink .5s steps(2) infinite; }
+  @keyframes blink { 50% { opacity: .35; } }
+
   .stamp {
     position: absolute; right: 10px; bottom: 10px;
     width: 84px; height: 84px;
@@ -90,21 +94,20 @@
     text-align: center;
     line-height: 1.05;
     transform: rotate(-12deg);
-    background: rgba(251, 250, 245, 0.75);
+    background: rgba(251, 250, 245, 0.8);
     pointer-events: none;
   }
-  .stamp .num { font-size: 30px; display: block; }
+  .stamp .num { font-size: 28px; display: block; }
   .stamp .unit { font-size: 12px; }
-  .stamp.pop { animation: pop .35s cubic-bezier(.2, 1.6, .4, 1) both; }
+  .stamp.pop { animation: pop .35s cubic-bezier(.2, 1.6, .4, 1) .15s both; }
   @keyframes pop { from { transform: rotate(-12deg) scale(2.2); opacity: 0; } to { transform: rotate(-12deg) scale(1); opacity: 1; } }
 
-  .result { display: flex; flex-direction: column; gap: 10px; }
   .title {
     font-family: "Dela Gothic One", sans-serif;
-    font-size: clamp(20px, 6vw, 26px);
+    font-size: clamp(22px, 6.5vw, 28px);
     line-height: 1.25;
     text-wrap: balance;
-    margin: 2px 0 0;
+    margin: 4px 0 0;
   }
   .sub { margin: 0; color: var(--ink-soft); font-size: 13px; line-height: 1.6; }
   .meters { display: grid; gap: 8px; margin: 0; }
@@ -120,6 +123,7 @@
   .comments { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; font-size: 13px; line-height: 1.55; }
   .comments li::before { content: "― "; color: var(--ink-soft); }
   .formula { font-size: 11.5px; color: var(--ink-soft); font-variant-numeric: tabular-nums; margin: 0; }
+  .best { font-size: 12px; color: var(--ink-soft); font-variant-numeric: tabular-nums; margin: 0; }
 
   .actions { display: flex; gap: 10px; flex-wrap: wrap; }
   button {
@@ -146,129 +150,118 @@
 
   @media (prefers-reduced-motion: reduce) {
     .bar i { transition: none; }
-    .stamp.pop { animation: none; }
+    .stamp.pop, .judging span { animation: none; }
   }
 </style>
 
-<div class="wrap">
-  <header>
-    <h1><span class="o">かき</span><span class="k">かき</span><span class="g">かき</span></h1>
-    <span class="best" id="best"></span>
-  </header>
-  <p class="odai">お題：<b>牡蠣</b>・<b>柿</b>・<b>餓鬼</b>のどれか（全部でも可）を<b>一筆で</b>。指を離したら終わり。</p>
-
-  <div class="board" id="board">
+<!-- 描く画面：採点の話は一切しない -->
+<main class="screen" id="draw">
+  <h1>一筆がき</h1>
+  <p class="odai"><b>牡蠣</b>か<b>柿</b>か<b>餓鬼</b>を、一筆で。</p>
+  <div class="board" id="drawBoard">
     <canvas id="cv" aria-label="一筆書きキャンバス"></canvas>
-    <div class="hint" id="hint"><div><big>ここに一筆</big>指を離したら即採点</div></div>
-    <div class="stamp" id="stamp" hidden><div><span class="num" id="stampNum">0</span><span class="unit">点</span></div></div>
+    <div class="hint" id="hint">ここに一筆</div>
+    <div class="judging" id="judging" hidden><span>採点中…</span></div>
   </div>
+</main>
 
-  <section class="result" id="result">
-    <p class="title" id="title">まだ何も描かれていない</p>
-    <p class="sub" id="sub">満点は100点。ただし複数のかきが同居していると加点されるので、100点を越えることもある。</p>
-    <dl class="meters">
-      <div class="meter m-o"><dt>牡蠣度</dt><dd><div class="bar"><i id="bo"></i></div></dd><dd class="val" id="vo">–</dd></div>
-      <div class="meter m-k"><dt>柿度</dt><dd><div class="bar"><i id="bk"></i></div></dd><dd class="val" id="vk">–</dd></div>
-      <div class="meter m-g"><dt>餓鬼度</dt><dd><div class="bar"><i id="bg"></i></div></dd><dd class="val" id="vg">–</dd></div>
-    </dl>
-    <ul class="comments" id="comments"></ul>
-    <p class="formula" id="formula"></p>
-  </section>
-
+<!-- 採点画面 -->
+<main class="screen" id="result" hidden>
+  <h1>一筆がき</h1>
+  <div class="board">
+    <canvas id="rcv" aria-label="あなたの一筆"></canvas>
+    <div class="stamp" id="stamp"><div><span class="num" id="stampNum">0</span><span class="unit">点</span></div></div>
+  </div>
+  <p class="title" id="title"></p>
+  <p class="sub" id="sub"></p>
+  <dl class="meters">
+    <div class="meter m-o"><dt>牡蠣度</dt><dd><div class="bar"><i id="bo"></i></div></dd><dd class="val" id="vo"></dd></div>
+    <div class="meter m-k"><dt>柿度</dt><dd><div class="bar"><i id="bk"></i></div></dd><dd class="val" id="vk"></dd></div>
+    <div class="meter m-g"><dt>餓鬼度</dt><dd><div class="bar"><i id="bg"></i></div></dd><dd class="val" id="vg"></dd></div>
+  </dl>
+  <ul class="comments" id="comments"></ul>
+  <p class="formula" id="formula"></p>
+  <p class="best" id="best"></p>
   <div class="actions">
     <button id="again" type="button">もう一筆</button>
-    <button id="share" type="button" class="ghost" disabled>結果をコピー</button>
+    <button id="share" type="button" class="ghost">結果をコピー</button>
   </div>
   <p class="toast" id="toast" aria-live="polite"></p>
-
   <details>
     <summary>採点のしくみ</summary>
     <ul>
       <li><b>柿度</b>：まんまるで、なめらかで、上のほうに<b>へた</b>（ギザギザ）があるほど高い。へた無しだと満点は出ない。</li>
       <li><b>牡蠣度</b>：ちょい細長い<b>涙型</b>で、フチが<b>フリフリ</b>しているほど高い。つるんとした楕円は牡蠣ではない。</li>
-      <li><b>餓鬼度</b>：線が自分と<b>交差</b>しまくり、<b>トゲトゲ</b>で、<b>線が長く</b>、<b>縦長</b>なほど高い。亡者はだいたいそういう形。</li>
-      <li>柿と牡蠣は、一筆の中にできた<b>ループ</b>をひとつずつ調べて一番それっぽいものを採用する。なので餓鬼に柿を持たせると両方点が入る。</li>
-      <li><b>合計</b> ＝ 1位の度 ＋ 2位 × 0.5 ＋ 3位 × 0.25。</li>
+      <li><b>餓鬼度</b>：線が自分と<b>交差</b>しまくり、<b>トゲトゲ</b>で、<b>線が長く</b>、<b>縦長</b>なほど高い。</li>
+      <li>柿と牡蠣は、一筆の中にできた<b>ループ</b>をひとつずつ調べて一番それっぽいものを採用。絵の中で柿色・灰青に塗られた部分がそれ。なので餓鬼に柿を持たせると両方点が入る。</li>
+      <li><b>合計</b> ＝ 1位の度 ＋ 2位 × 0.5 ＋ 3位 × 0.25。満点は100点、組み合わせ次第で越える。</li>
     </ul>
   </details>
-</div>
+</main>
 
 <script src="scoring.js"></script>
 <script>
 (() => {
-  const board = document.getElementById("board");
-  const cv = document.getElementById("cv");
-  const ctx = cv.getContext("2d");
   const $ = id => document.getElementById(id);
   const INK = "#1c1b22", KAKI = "#e2621b", OYSTER = "#5f7383";
+  const cv = $("cv"), ctx = cv.getContext("2d");
+  const rcv = $("rcv"), rctx = rcv.getContext("2d");
 
-  let pts = [];       // CSS px 座標
-  let state = "idle"; // idle → drawing → done
-  let lastResult = null;
-  let showingSample = false;
-  let dpr = 1, size = 0;
+  let pts = [];       // 描画キャンバスの CSS px 座標
+  let drawSize = 1;   // 描いたときのキャンバス一辺（結果画面で縮尺をそろえる）
+  let state = "idle"; // idle → drawing → judging → result
+  let lastShare = "";
 
-  function fit() {
-    const r = board.getBoundingClientRect();
-    dpr = Math.min(window.devicePixelRatio || 1, 3);
-    size = r.width;
-    cv.width = Math.round(r.width * dpr);
-    cv.height = Math.round(r.height * dpr);
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    redraw();
-  }
-
-  function fillLoop(loop, color) {
-    if (!loop || loop.length < 3) return;
-    ctx.save();
-    ctx.globalAlpha = 0.28;
-    ctx.fillStyle = color;
-    ctx.beginPath();
-    ctx.moveTo(loop[0].x, loop[0].y);
-    for (const p of loop) ctx.lineTo(p.x, p.y);
-    ctx.closePath();
-    ctx.fill("evenodd");
-    ctx.restore();
+  function setupCanvas(c, g) {
+    const r = c.getBoundingClientRect();
+    const dpr = Math.min(window.devicePixelRatio || 1, 3);
+    c.width = Math.round(r.width * dpr);
+    c.height = Math.round(r.height * dpr);
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    return r.width;
   }
 
   // 筆っぽく：速いところは細く、ゆっくりは太く
-  function strokeInk() {
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
-    ctx.strokeStyle = INK;
+  function strokeInk(g, list, scale) {
+    g.lineCap = "round";
+    g.lineJoin = "round";
+    g.strokeStyle = INK;
     let w = 6;
-    for (let i = 1; i < pts.length; i++) {
-      const a = pts[i - 1], b = pts[i];
+    for (let i = 1; i < list.length; i++) {
+      const a = list[i - 1], b = list[i];
       const v = Math.hypot(b.x - a.x, b.y - a.y) / Math.max(1, b.t - a.t);
       const target = Math.max(2.5, Math.min(9, 8.5 - v * 2.2));
       w += (target - w) * 0.25;
-      ctx.lineWidth = w;
-      ctx.beginPath();
-      ctx.moveTo(a.x, a.y);
-      ctx.lineTo(b.x, b.y);
-      ctx.stroke();
+      g.lineWidth = w * Math.max(0.6, scale);
+      g.beginPath();
+      g.moveTo(a.x * scale, a.y * scale);
+      g.lineTo(b.x * scale, b.y * scale);
+      g.stroke();
     }
   }
 
-  function redraw() {
-    ctx.clearRect(0, 0, cv.width, cv.height);
-    if (lastResult) {
-      fillLoop(lastResult.oysterLoop, OYSTER);
-      fillLoop(lastResult.kakiLoop, KAKI);
-    }
-    strokeInk();
+  function fillLoop(g, loop, color, scale) {
+    if (!loop || loop.length < 3) return;
+    g.save();
+    g.globalAlpha = 0.3;
+    g.fillStyle = color;
+    g.beginPath();
+    g.moveTo(loop[0].x * scale, loop[0].y * scale);
+    for (const p of loop) g.lineTo(p.x * scale, p.y * scale);
+    g.closePath();
+    g.fill("evenodd");
+    g.restore();
   }
 
+  // ------ 描く画面 ------
   function pos(e) {
     const r = cv.getBoundingClientRect();
     return { x: e.clientX - r.left, y: e.clientY - r.top, t: e.timeStamp };
   }
-
   cv.addEventListener("pointerdown", e => {
-    if (showingSample) reset(); // 見本はタッチしたら消えてすぐ描ける
     if (state !== "idle") return;
     e.preventDefault();
-    cv.setPointerCapture(e.pointerId);
+    try { cv.setPointerCapture(e.pointerId); } catch (_) {}
     state = "drawing";
     pts = [pos(e)];
     $("hint").hidden = true;
@@ -278,8 +271,8 @@
     const evs = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
     const start = pts.length;
     for (const ev of evs) pts.push(pos(ev));
-    // 増えた分だけ描く
     ctx.lineCap = "round";
+    ctx.lineJoin = "round";
     ctx.strokeStyle = INK;
     ctx.lineWidth = 5;
     ctx.beginPath();
@@ -291,8 +284,20 @@
   cv.addEventListener("pointerup", finish);
   cv.addEventListener("pointercancel", finish);
   cv.addEventListener("lostpointercapture", finish);
+  // 描いている最中に画面がスクロール・拡大しないように
+  $("drawBoard").addEventListener("touchmove", e => e.preventDefault(), { passive: false });
 
-  // ------ 判定 ------
+  function resetDraw() {
+    pts = [];
+    state = "idle";
+    drawSize = setupCanvas(cv, ctx);
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    $("hint").textContent = "ここに一筆";
+    $("hint").hidden = false;
+    $("judging").hidden = true;
+  }
+
+  // ------ 採点 ------
   const COMMENTS = {
     oyster: [
       [85, "これは完全に牡蠣。広島から苦情が来るレベル。"],
@@ -335,22 +340,37 @@
   }
 
   function judge() {
-    state = "done";
     const r = KakiScore.score(pts.map(p => ({ x: p.x, y: p.y })));
     if (r.tooShort) {
-      toast("短すぎて採点できない。もう少し描いて。");
-      reset();
+      // 短すぎるものは採点せず、その場でやり直し
+      resetDraw();
+      $("hint").textContent = "短すぎ。もう一回";
       return;
     }
-    lastResult = r;
-    redraw();
-    const s = { oyster: r.oyster, kaki: r.kaki, gaki: r.gaki };
-    const tot = KakiScore.total(s);
-    show(s, tot);
+    state = "judging";
+    $("judging").hidden = false;
+    setTimeout(() => showResult(r), 700);
   }
 
-  function show(s, tot) {
-    $("title").textContent = titleFor(s, tot);
+  function showResult(r) {
+    state = "result";
+    $("draw").hidden = true;
+    $("result").hidden = false;
+    window.scrollTo(0, 0);
+
+    const size = setupCanvas(rcv, rctx);
+    const scale = size / drawSize;
+    rctx.clearRect(0, 0, rcv.width, rcv.height);
+    // 同じループが柿にも牡蠣にも選ばれたら、点の高いほうの色だけで塗る
+    const same = r.oysterLoop && r.oysterLoop === r.kakiLoop;
+    if (!same || r.oyster >= r.kaki) fillLoop(rctx, r.oysterLoop, OYSTER, scale);
+    if (!same || r.kaki > r.oyster) fillLoop(rctx, r.kakiLoop, KAKI, scale);
+    strokeInk(rctx, pts, scale);
+
+    const s = { oyster: r.oyster, kaki: r.kaki, gaki: r.gaki };
+    const tot = KakiScore.total(s);
+    const title = titleFor(s, tot);
+    $("title").textContent = title;
     $("sub").textContent = tot > 100
       ? `${tot}点。満点（100点）を突破。かきが渋滞しています。`
       : tot >= 100 ? "100点満点。文句なし。" : `${tot}点 / 100点満点`;
@@ -368,25 +388,18 @@
     $("formula").textContent = `合計 ＝ ${v[0]} ＋ ${v[1]}×0.5 ＋ ${v[2]}×0.25 ＝ ${tot}点`;
     $("stampNum").textContent = tot;
     const st = $("stamp");
-    st.hidden = false;
     st.classList.remove("pop"); void st.offsetWidth; st.classList.add("pop");
-    $("share").disabled = false;
-    lastShare = `【かきかきかき】${$("title").textContent} ${tot}点\n牡蠣度${s.oyster} / 柿度${s.kaki} / 餓鬼度${s.gaki}`;
+    lastShare = `【一筆がき】${title} ${tot}点\n牡蠣度${s.oyster} / 柿度${s.kaki} / 餓鬼度${s.gaki}`;
     saveBest(tot);
+    toast("");
   }
 
-  function reset() {
-    showingSample = false;
-    pts = [];
-    lastResult = null;
-    state = "idle";
-    $("hint").hidden = false;
-    $("stamp").hidden = true;
-    redraw();
-  }
-
-  let lastShare = "";
-  $("again").addEventListener("click", () => { reset(); toast(""); });
+  $("again").addEventListener("click", () => {
+    $("result").hidden = true;
+    $("draw").hidden = false;
+    window.scrollTo(0, 0);
+    resetDraw();
+  });
   $("share").addEventListener("click", () => {
     const done = () => toast("コピーした。");
     const fail = () => toast(lastShare.replace("\n", "　"));
@@ -400,49 +413,15 @@
     if (msg) toastTimer = setTimeout(() => { $("toast").textContent = ""; }, 4000);
   }
 
-  function readBest() { try { return +localStorage.getItem("kakikakikaki-best") || 0; } catch (_) { return 0; } }
+  const BEST_KEY = "hitofudegaki-best";
+  function readBest() { try { return +localStorage.getItem(BEST_KEY) || 0; } catch (_) { return 0; } }
   function saveBest(v) {
     const b = readBest();
-    if (v > b) { try { localStorage.setItem("kakikakikaki-best", String(v)); } catch (_) {} }
-    renderBest();
-  }
-  function renderBest() { const b = readBest(); $("best").textContent = b ? `自己ベスト ${b}点` : ""; }
-
-  // 最初は見本（柿）を置いておく：何をするアプリかひと目で分かるように
-  function sample() {
-    const c = size / 2, r = size * 0.26, cy = size * 0.56;
-    const p = [];
-    for (let i = 0; i <= 90; i++) {
-      const a = -Math.PI / 2 + (i / 90) * Math.PI * 2;
-      p.push({ x: c + r * Math.cos(a), y: cy + r * 0.95 * Math.sin(a), t: i * 16 });
-    }
-    const top = cy - r * 0.95 + size * 0.02;
-    [[-0.1, 0.035], [-0.06, -0.035], [-0.02, 0.03], [0.02, -0.04], [0.06, 0.03], [0.1, -0.03]]
-      .forEach(([dx, dy], i) => p.push({ x: c + dx * size, y: top + dy * size, t: 1500 + i * 60 }));
-    return p;
+    if (v > b) { try { localStorage.setItem(BEST_KEY, String(v)); } catch (_) {} }
+    $("best").textContent = v > b ? "自己ベスト更新！" : `自己ベスト ${Math.max(b, v)}点`;
   }
 
-  window.addEventListener("resize", () => { if (state !== "drawing") fit(); });
-  fit();
-  renderBest();
-  // 見本を採点した状態で開く（見本と明記）
-  pts = sample();
-  const r = KakiScore.score(pts);
-  lastResult = r;
-  redraw();
-  $("hint").hidden = true;
-  state = "done";
-  showingSample = true;
-  const s = { oyster: r.oyster, kaki: r.kaki, gaki: r.gaki };
-  const tot = KakiScore.total(s);
-  $("title").textContent = "見本：" + titleFor(s, tot);
-  $("sub").textContent = `見本の柿は${tot}点。キャンバスに触れたら、あなたの番。`;
-  for (const [k, bar, val] of [["oyster", "bo", "vo"], ["kaki", "bk", "vk"], ["gaki", "bg", "vg"]]) {
-    $(val).textContent = s[k];
-    $(bar).style.width = s[k] + "%";
-  }
-  $("formula").textContent = "";
-  $("stampNum").textContent = tot;
-  $("stamp").hidden = false;
+  window.addEventListener("resize", () => { if (state === "idle") resetDraw(); });
+  resetDraw();
 })();
 </script>
